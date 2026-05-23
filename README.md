@@ -30,10 +30,15 @@ No API key required. Scripts live in `backend/ingestion/`.
 - **20 seasons** — 2004-05 through 2024-25, stored with year and label
 - **2225 players** - the stats of all 2225 players who played during this time period
 
+### Current Development
+- First model was slightly inaccurate, picked Luka for 2024, because it overweighs scoring rate (ppg). More advanced stats like BPM and other factors will be added next
+
+
 ### To re-run ingestion
 ```bash
 cd backend/ingestion
 python3 ingest_teams_seasons.py
+
 
 ## Development Phases
 
