@@ -47,21 +47,23 @@ def load_training_data(db):
 
 def train_baseline_model(df):
     feature_cols = [
-    "points_per_game",
-    "team_win_pct", "team_conf_rank",
-    "games_played_pct",
-    "ppg_rank", "apg_rank", "rpg_rank",
-    "ppg_improvement", "apg_improvement", "rpg_improvement",
-  ]
+        "points_per_game",
+        "usage_rate",
+        "ts_pct",
+        "per",
+        "team_win_pct", "team_conf_rank",
+        "games_played_pct",
+        "ppg_rank", "apg_rank", "rpg_rank",
+        "ppg_improvement", "apg_improvement", "rpg_improvement",
+    ]
 
     # Drop rows with any missing features
-    print(df[feature_cols].isnull().sum())
+    
     df = df.dropna(subset=feature_cols)
 
     # Split by season — train on older seasons, test on recent ones
     # This is important: never test on data the model trained on
-    print(df["season_year"].dtype)
-    print(df["season_year"].unique())
+    
     train_df = df[df["season_year"].astype(int) <= 2022]
     test_df = df[df["season_year"].astype(int) > 2022]
 

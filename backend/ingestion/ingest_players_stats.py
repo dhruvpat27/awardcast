@@ -1,7 +1,7 @@
 import sys
 import os
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'db'))
-
+import pandas as pd
 import time
 from connection import SessionLocal
 from sqlalchemy import text
@@ -84,6 +84,52 @@ def ingest_players_and_stats(season_label):
     db.close()
     print(f"Done with {season_label}")
 
+def ingest_advanced_stats(season_label):
+    db = SessionLocal()
+
+    print(f"Fetching advanced stats for {season_label}...")
+    time.sleep(0.5)
+
+    advanced = leaguedashplayerstats.LeagueDashPlayerStats(
+        season=season_label,
+        measure_type_detailed_defense="Advanced"
+    ).get_data_frames()[0]
+
+    year = int(season_label[:4]) + 1
+    season = db.execute(text("SELECT id FROM seasons WHERE year = :year"), {"year": year}).fetchone()
+    if not season:
+        print(f"Season {season_label} not found in DB, skipping.")
+        db.close()
+        return
+    season_id = season[0]
+
+    for _, row in advanced.iterrows():
+        player = db.execute(text("SELECT id FROM players WHERE nba_player_id = :nba_player_id"), {
+            "nba_player_id": int(row["PLAYER_ID"])
+        }).fetchone()
+        if not player:
+            continue
+        player_id = player[0]
+
+        db.execute(text("""
+            UPDATE player_season_stats
+            SET 
+                usage_rate = :usage_rate,
+                true_shooting_pct = :ts_pct,
+                per = :per
+            WHERE player_id = :player_id AND season_id = :season_id
+        """), {
+            "player_id": player_id,
+            "season_id": season_id,
+            "usage_rate": float(row["USG_PCT"]) if pd.notna(row["USG_PCT"]) else None,
+            "ts_pct": float(row["TS_PCT"]) if pd.notna(row["TS_PCT"]) else None,
+            "per": float(row["PIE"]) if pd.notna(row["PIE"]) else None,
+        })
+
+    db.commit()
+    db.close()
+    print(f"Advanced stats done for {season_label}")
+
 def ingest_team_stats(season_label):
     db = SessionLocal()
 
@@ -131,12 +177,14 @@ if __name__ == "__main__":
         "2004-05", "2005-06", "2006-07", "2007-08", "2008-09",
         "2009-10", "2010-11", "2011-12", "2012-13", "2013-14",
         "2014-15", "2015-16", "2016-17", "2017-18", "2018-19",
-        "2019-20", "2020-21", "2021-22", "2022-23", "2023-24", "2024-25"
+        "2019-20", "2020-21", "2021-22", "2022-23", "2023-24",
+        "2024-25"
     ]
 
     for season in seasons:
         ingest_players_and_stats(season)
         ingest_team_stats(season)
+        ingest_advanced_stats(season)
         time.sleep(1)
 
     print("All done.")

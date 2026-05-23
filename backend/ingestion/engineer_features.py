@@ -81,7 +81,11 @@ def save_features(db, df):
                 :per, :win_shares, :bpm, :vorp, :award_eligible
             )
             ON CONFLICT (player_id, season_id) DO UPDATE
-              SET award_eligible = EXCLUDED.award_eligible
+              SET
+                  usage_rate = EXCLUDED.usage_rate,
+                  ts_pct = EXCLUDED.ts_pct,
+                  per = EXCLUDED.per,
+                  award_eligible = EXCLUDED.award_eligible
         """), {
             "player_id": int(row["player_id"]),
             "season_id": int(row["season_id"]),

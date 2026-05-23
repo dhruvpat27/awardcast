@@ -32,6 +32,7 @@ No API key required. Scripts live in `backend/ingestion/`.
 
 ### Current Development
 - First model was slightly inaccurate, picked Luka for 2024, because it overweighs scoring rate (ppg). More advanced stats like BPM and other factors will be added next
+- Added advanced stats to PostgreSQL table, now can pull info. like utility rate, true shooting pct, and much more. These now affect the mvp predictions, Jokic is properly represented for 2024 and 2025.
 
 
 ### To re-run ingestion
