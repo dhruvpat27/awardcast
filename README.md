@@ -42,8 +42,9 @@ python3 ingest_teams_seasons.py
 - [x] Phase 1c — DB connection via SQLAlchemy
 - [x] Phase 1d — Teams and seasons ingested
 - [x] Phase 1e — Player and team season stats ingestion
-- [ ] Phase 2 — Feature engineering
-- [ ] Phase 3 — Baseline ML models
+- [x] Phase 2 — Feature engineering
+- [x] Phase 3a — Historical MVP voting data scraped from Basketball Reference (21 seasons)
+- [ ] Phase 3b - Baseline ML models
 - [ ] Phase 4 — TensorFlow + experiment tracking
 - [ ] Phase 5 — FastAPI backend
 - [ ] Phase 6 — React dashboard

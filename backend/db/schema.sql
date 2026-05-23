@@ -73,3 +73,42 @@ CREATE TABLE IF NOT EXISTS award_votes (
     won BOOLEAN DEFAULT FALSE,
     UNIQUE(player_id, season_id, award_type)
 );
+
+-- Engineered features for ML models
+CREATE TABLE IF NOT EXISTS player_season_features (
+    id SERIAL PRIMARY KEY,
+    player_id INTEGER REFERENCES players(id),
+    season_id INTEGER REFERENCES seasons(id),
+
+    -- Scoring & usage
+    points_per_game NUMERIC(5,2),
+    usage_rate NUMERIC(5,2),
+    ts_pct NUMERIC(5,3),
+
+    -- Team success
+    team_win_pct NUMERIC(5,3),
+    team_conf_rank INTEGER,
+
+    -- Availability
+    games_played INTEGER,
+    games_played_pct NUMERIC(5,3),
+    award_eligible BOOLEAN DEFAULT FALSE,
+
+    -- League rankings (how dominant were they that season)
+    ppg_rank INTEGER,
+    apg_rank INTEGER,
+    rpg_rank INTEGER,
+
+    -- Year over year improvement
+    ppg_improvement NUMERIC(5,2),
+    apg_improvement NUMERIC(5,2),
+    rpg_improvement NUMERIC(5,2),
+
+    -- Efficiency
+    per NUMERIC(6,2),
+    win_shares NUMERIC(6,2),
+    bpm NUMERIC(5,2),
+    vorp NUMERIC(5,2),
+
+    UNIQUE(player_id, season_id)
+);
