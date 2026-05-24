@@ -119,7 +119,20 @@ def train_model(df):
     ]
     print(top.to_string(index=False))
 
+    # Save model and scaler
+    import joblib
+
+    save_dir = os.path.join(os.path.dirname(__file__), 'saved_models')
+    os.makedirs(save_dir, exist_ok=True)
+
+    model.save(os.path.join(save_dir, 'mvp_model.keras'))
+    joblib.dump(scaler, os.path.join(save_dir, 'mvp_scaler.pkl'))
+    print(f"\nModel saved to {save_dir}")
+
     return model, scaler
+
+    
+
 
 if __name__ == "__main__":
     print("Loading training data...")
