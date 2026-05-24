@@ -34,6 +34,7 @@ No API key required. Scripts live in `backend/ingestion/`.
 - First model was slightly inaccurate, picked Luka for 2024, because it overweighs scoring rate (ppg). More advanced stats like BPM and other factors will be added next
 - Added advanced stats to PostgreSQL table, now can pull info. like utility rate, true shooting pct, and much more. These now affect the mvp predictions, Jokic is properly represented for 2024 and 2025.
 - Created first Tensorflow model for MVP. Only one inaccuracy so far, Luka is back as 2024 MVP favorite, barely over Jokic. This might be statistically accurate (a lot of people that year say Luka was robbed of the award)
+- Made FastAPI backend which stores and provides easy access to the Tensorflow model's output.
 
 
 ### To re-run ingestion
@@ -53,7 +54,7 @@ python3 ingest_teams_seasons.py
 - [x] Phase 3a — Historical MVP voting data scraped from Basketball Reference (21 seasons)
 - [x] Phase 3b - Baseline ML models
 - [x] Phase 4 — TensorFlow neural network MVP model (ROC-AUC: 0.996)
-- [ ] Phase 5 — FastAPI backend
+- [x] Phase 5 — FastAPI backend (players, leaderboard, predictions endpoints)
 - [ ] Phase 6 — React dashboard
 - [ ] Phase 7 — Docker, deployment, polish
 
