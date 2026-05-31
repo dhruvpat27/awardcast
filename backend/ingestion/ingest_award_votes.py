@@ -112,13 +112,91 @@ def ingest_mvp_votes(season_year):
     db.close()
     print(f"  Done with {season_year}")
 
+def ingest_dpoy_votes(season_year):
+    db = SessionLocal()
+
+    season = db.execute(text("SELECT id FROM seasons WHERE year = :year"),
+                       {"year": season_year}).fetchone()
+    if not season:
+        print(f"  Season {season_year} not found in DB")
+        db.close()
+        return
+    season_id = season[0]
+
+    url = f"https://www.basketball-reference.com/awards/awards_{season_year}.html"
+
+    try:
+        tables = pd.read_html(url, header=1)
+        # DPOY is the second table on the page
+        dpoy_df = tables[3]
+        print(f"  Found {len(dpoy_df)} DPOY vote rows for {season_year}")
+    except Exception as e:
+        print(f"  Failed to scrape {season_year}: {e}")
+        db.close()
+        return
+
+    dpoy_df.columns = [c.strip() for c in dpoy_df.columns]
+
+    for rank, row in enumerate(dpoy_df.itertuples(), start=1):
+        
+        if not isinstance(row.Player, str):
+            continue
+        player_name = normalize_name(row.Player)
+
+        player = db.execute(text("""
+            SELECT id FROM players
+            WHERE translate(lower(full_name), 'čćđšžàáâãäåèéêëìíîïòóôõöùúûüýÿ', 'ccdszaaaaaaeeeeiiiioooooouuuuyy')
+            = lower(:name)
+        """), {"name": player_name}).fetchone()
+
+        if not player:
+            print(f"  Player not found in DB: {player_name}")
+            continue
+        player_id = player[0]
+
+        try:
+            first_place_votes = int(row._6) if hasattr(row, '_6') else 0
+        except:
+            first_place_votes = 0
+
+        try:
+            total_points = int(row.Pts) if hasattr(row, 'Pts') else 0
+        except:
+            total_points = 0
+
+        won = (rank == 1)
+
+        db.execute(text("""
+            INSERT INTO award_votes (
+                player_id, season_id, award_type,
+                first_place_votes, total_points, final_rank, won
+            )
+            VALUES (
+                :player_id, :season_id, :award_type,
+                :first_place_votes, :total_points, :final_rank, :won
+            )
+            ON CONFLICT (player_id, season_id, award_type) DO NOTHING
+        """), {
+            "player_id": player_id,
+            "season_id": season_id,
+            "award_type": "DPOY",
+            "first_place_votes": first_place_votes,
+            "total_points": total_points,
+            "final_rank": rank,
+            "won": won
+        })
+
+    db.commit()
+    db.close()
+    print(f"  DPOY done for {season_year}")
+
 if __name__ == "__main__":
-    # 2005 = 2004-05 season through 2025 = 2024-25 season
     season_years = list(range(2005, 2026))
 
     for year in season_years:
-        print(f"Scraping MVP votes for {year}...")
-        ingest_mvp_votes(year)
-        time.sleep(3)  # be respectful to Basketball Reference
+        print(f"Scraping DPOY votes for {year}...")
+        ingest_dpoy_votes(year)
+        time.sleep(3)
 
     print("All done.")
+
