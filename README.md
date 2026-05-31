@@ -1,3 +1,9 @@
+## AwardCast
+**Functionality**
+AwardCast is an NBA analytics and machine learning platform built to analyze MVP voting trends, predict award outcomes, and investigate whether certain players were statistically “snubbed” of MVP awards. The project uses historical NBA player statistics, advanced metrics, team performance, and award voting data to allow users to see what machine learning models determine the “statistical MVP” should have been. 
+
+Want to eventually extend it to an app that can forecast future MVP's or allow you to input a player's stats into a year they did not play in and see if they would win MVP or not.
+
 Phase Notes
 VENV + Database Set Up:
 ## Database Schema
