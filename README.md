@@ -61,7 +61,8 @@ python3 ingest_teams_seasons.py
 - [x] Phase 3b - Baseline ML models
 - [x] Phase 4 — TensorFlow neural network MVP model (ROC-AUC: 0.996)
 - [x] Phase 5 — FastAPI backend (players, leaderboard, predictions endpoints)
-- [ ] Phase 6 — React dashboard
+- [x] Phase 6a — Player page with career trajectory and MVP probability chart
+- [x] Phase 6b — Historical snubs page revealing MVP voter bias
 - [ ] Phase 7 — Docker, deployment, polish
 
 Other Notes:

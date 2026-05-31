@@ -4,6 +4,9 @@ import Navbar from './components/Navbar';
 import Leaderboard from './pages/Leaderboard';
 import PlayerPage from './pages/PlayerPage';
 import Compare from './pages/Compare';
+import Snubs from './pages/Snubs';
+
+
 
 function App() {
   return (
@@ -14,6 +17,7 @@ function App() {
           <Route path="/" element={<Leaderboard />} />
           <Route path="/player/:id" element={<PlayerPage />} />
           <Route path="/compare" element={<Compare />} />
+          <Route path="/snubs" element={<Snubs />} />
         </Routes>
       </div>
     </Router>
