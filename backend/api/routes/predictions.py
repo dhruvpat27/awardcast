@@ -140,6 +140,77 @@ def get_player_predictions(player_id: int):
 
     return rows
 
+
+@router.get("/head-to-head/{player1_id}/{season1}/{player2_id}/{season2}")
+def head_to_head(player1_id: int, season1: int, player2_id: int, season2: int):
+    db = SessionLocal()
+
+    import joblib
+    import tensorflow as tf
+    import numpy as np
+    import pandas as pd
+
+    BASE = os.path.join(os.path.dirname(__file__), '..', '..', 'models', 'saved_models')
+    model = tf.keras.models.load_model(os.path.join(BASE, 'mvp_model.keras'))
+    scaler = joblib.load(os.path.join(BASE, 'mvp_scaler.pkl'))
+
+    FEATURE_COLS = [
+        "points_per_game", "usage_rate", "ts_pct", "per",
+        "team_win_pct", "team_conf_rank", "games_played_pct",
+        "ppg_rank", "apg_rank", "rpg_rank",
+        "ppg_improvement", "apg_improvement", "rpg_improvement",
+    ]
+
+    def get_features(player_id, season_year):
+        result = db.execute(text("""
+            SELECT
+                p.full_name,
+                s.label as season,
+                f.points_per_game, f.usage_rate, f.ts_pct, f.per,
+                f.team_win_pct, f.team_conf_rank, f.games_played_pct,
+                f.ppg_rank, f.apg_rank, f.rpg_rank,
+                f.ppg_improvement, f.apg_improvement, f.rpg_improvement
+            FROM player_season_features f
+            JOIN players p ON p.id = f.player_id
+            JOIN seasons s ON s.id = f.season_id
+            WHERE f.player_id = :player_id AND s.year = :year
+        """), {"player_id": player_id, "year": season_year})
+        row = result.fetchone()
+        return dict(row._mapping) if row else None
+
+    p1 = get_features(player1_id, season1)
+    p2 = get_features(player2_id, season2)
+    db.close()
+
+    if not p1 or not p2:
+        return {"error": "One or both players not found"}
+
+    df = pd.DataFrame([p1, p2])
+    X = df[FEATURE_COLS].fillna(0).values
+    X_scaled = scaler.transform(X)
+    probs = model.predict(X_scaled).flatten()
+
+    p1_prob = float(probs[0])
+    p2_prob = float(probs[1])
+
+    # Use softmax-style normalization to amplify differences
+    import numpy as np
+    raw = np.array([p1_prob, p2_prob])
+    # Amplify the gap by raising to a power before normalizing
+    amplified = raw ** 10
+    total = amplified[0] + amplified[1]
+
+    p1_pct = float(round((amplified[0] / total) * 100, 1))
+    p2_pct = float(round((amplified[1] / total) * 100, 1))
+    winner = p1["full_name"] if p1_prob > p2_prob else p2["full_name"]
+
+    return {
+        "player1": {"name": p1["full_name"], "season": p1["season"], "probability": p1_prob, "share": p1_pct},
+        "player2": {"name": p2["full_name"], "season": p2["season"], "probability": p2_prob, "share": p2_pct},
+        "winner": winner
+    }
+
+
 @router.get("/{player_id}/{season_year}")
 def get_player_prediction(player_id: int, season_year: int):
     db = SessionLocal()

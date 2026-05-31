@@ -4,6 +4,9 @@ AwardCast is an NBA analytics and machine learning platform built to analyze MVP
 
 Want to eventually extend it to an app that can forecast future MVP's or allow you to input a player's stats into a year they did not play in and see if they would win MVP or not.
 
+## Current Functionality
+Able to display with Machine Learning, every year's suggest MVP based on previous trends, and provides a bar graph of the top leaders. This works for 2004 - 2025. Also allows you to compare players that were in the running from MVP between years, for instance, allowing you to compare SGA's 2025 MVP year to Jokic in 2024. Also displays all potential MVP snubs throughout the 20 years with ranging model confidence rates. 
+
 Phase Notes
 VENV + Database Set Up:
 ## Database Schema
@@ -63,6 +66,7 @@ python3 ingest_teams_seasons.py
 - [x] Phase 5 — FastAPI backend (players, leaderboard, predictions endpoints)
 - [x] Phase 6a — Player page with career trajectory and MVP probability chart
 - [x] Phase 6b — Historical snubs page revealing MVP voter bias
+- [x] Phase 6c — Compare page with radar chart, stat cards, and head-to-head MVP predictor
 - [ ] Phase 7 — Docker, deployment, polish
 
 Other Notes:

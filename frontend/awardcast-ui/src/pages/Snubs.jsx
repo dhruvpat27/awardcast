@@ -56,7 +56,7 @@ export default function Snubs() {
           <thead>
             <tr style={{ borderBottom: '1px solid #333' }}>
               {['Season', 'Player', 'Model Confidence', 'Actual MVP Rank', 'PPG', 'Team Win%', 'Actual Winner'].map(h => (
-                <th key={h} style={{ color: '#aaa', textAlign: 'left', padding: '8px' }}>{h}</th>
+                <th key={h} style={{ color: '#aaa', textAlign: 'left', padding: '8px', whiteSpace: 'nowrap' }}>{h}</th>
               ))}
             </tr>
           </thead>
