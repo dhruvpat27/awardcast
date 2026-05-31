@@ -7,9 +7,27 @@ Want to eventually extend it to an app that can forecast future MVP's or allow y
 ## Current Functionality
 Able to display with Machine Learning, every year's suggest MVP based on previous trends, and provides a bar graph of the top leaders. This works for 2004 - 2025. Also allows you to compare players that were in the running from MVP between years, for instance, allowing you to compare SGA's 2025 MVP year to Jokic in 2024. Also displays all potential MVP snubs throughout the 20 years with ranging model confidence rates. 
 
-Phase Notes
-VENV + Database Set Up:
-## Database Schema
+## Model Performance
+
+### MVP Model (TensorFlow Neural Network)
+- **ROC-AUC: 0.996**
+- Trained on 21 seasons (2004-05 through 2024-25) of player season stats, advanced metrics, and historical voting data
+- Features: points per game, usage rate, true shooting %, team win percentage, conference rank, games played, league rankings, year-over-year improvement, PIE
+- Test set: 2022-23 through 2024-25 seasons
+- Top 10 predicted candidates across test seasons were all confirmed top-5 MVP vote receivers
+- Known limitation: model reflects statistical merit, not voter narrative — explains historically snubbed players like James Harden (2018-19, 36.1 PPG) and Luka Dončić (2023-24, 33.9 PPG)
+
+### DPOY Model (TensorFlow Neural Network)
+- **ROC-AUC: 0.935**
+- Same architecture as MVP model, trained on DPOY-specific features
+- Features: blocks per game, steals per game, rebounds per game, defensive rating, games played percentage, team win percentage, conference rank, stocks (blocks + steals) per game, stocks rank
+- Test set: 2022-23 through 2024-25 seasons
+- Lower accuracy than MVP reflects the fundamental difficulty of quantifying defensive impact through box score stats alone — metrics like steals and blocks don't capture defensive IQ, positioning, or deterrence effect
+- Known limitation: model overrates guards with high steal rates (e.g. SGA) since traditional stats can't distinguish defensive specialists from offensive stars with good steal numbers
+
+## Phase Notes
+### VENV + Database Set Up
+#### Database Schema
 
 Six tables make up the foundation of the data warehouse:
 
