@@ -40,31 +40,31 @@ Six tables make up the foundation of the data warehouse:
 
 ---
 
-## Why a Virtual Environment
+#### Why a Virtual Environment
 
 A venv isolates this project's Python dependencies from everything else on your machine.
 Without it, installing packages globally can cause version conflicts across projects.
 The `requirements.txt` file captures the exact versions used so anyone cloning this repo
 can recreate the environment exactly with `pip install -r requirements.txt`.
 
-## Data Ingestion
+#### Data Ingestion
 
 Data is pulled using `nba_api`, a free Python package that hits NBA.com endpoints directly.
 No API key required. Scripts live in `backend/ingestion/`.
 
-### What's been ingested so far
+#### What's been ingested so far
 - **30 NBA teams** — pulled from nba_api static data, stored with NBA.com team IDs
 - **20 seasons** — 2004-05 through 2024-25, stored with year and label
 - **2225 players** - the stats of all 2225 players who played during this time period
 
-### Development Phase Notes
+#### Development Phase Notes
 - First model was slightly inaccurate, picked Luka for 2024, because it overweighs scoring rate (ppg). More advanced stats like BPM and other factors will be added next
 - Added advanced stats to PostgreSQL table, now can pull info. like utility rate, true shooting pct, and much more. These now affect the mvp predictions, Jokic is properly represented for 2024 and 2025.
 - Created first Tensorflow model for MVP. Only one inaccuracy so far, Luka is back as 2024 MVP favorite, barely over Jokic. This might be statistically accurate (a lot of people that year say Luka was robbed of the award)
 - Made FastAPI backend which stores and provides easy access to the Tensorflow model's output.
 
 
-### To re-run ingestion
+#### To re-run ingestion
 ```bash
 cd backend/ingestion
 python3 ingest_teams_seasons.py
