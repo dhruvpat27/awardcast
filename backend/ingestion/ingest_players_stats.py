@@ -130,6 +130,49 @@ def ingest_advanced_stats(season_label):
     db.close()
     print(f"Advanced stats done for {season_label}")
 
+def ingest_defensive_stats(season_label):
+    db = SessionLocal()
+
+    print(f"Fetching defensive stats for {season_label}...")
+    time.sleep(0.5)
+
+    defensive = leaguedashplayerstats.LeagueDashPlayerStats(
+        season=season_label,
+        measure_type_detailed_defense="Defense"
+    ).get_data_frames()[0]
+
+    year = int(season_label[:4]) + 1
+    season = db.execute(text("SELECT id FROM seasons WHERE year = :year"), {"year": year}).fetchone()
+    if not season:
+        print(f"Season {season_label} not found in DB, skipping.")
+        db.close()
+        return
+    season_id = season[0]
+
+    for _, row in defensive.iterrows():
+        player = db.execute(text("SELECT id FROM players WHERE nba_player_id = :nba_player_id"), {
+            "nba_player_id": int(row["PLAYER_ID"])
+        }).fetchone()
+        if not player:
+            continue
+        player_id = player[0]
+
+        db.execute(text("""
+            UPDATE player_season_stats
+            SET def_rating = :def_rating
+            WHERE player_id = :player_id AND season_id = :season_id
+        """), {
+            "player_id": player_id,
+            "season_id": season_id,
+            "def_rating": float(row["DEF_RATING"]) if pd.notna(row["DEF_RATING"]) else None,
+        })
+
+    db.commit()
+    db.close()
+    print(f"Defensive stats done for {season_label}")
+
+
+
 def ingest_team_stats(season_label):
     db = SessionLocal()
 
@@ -182,9 +225,7 @@ if __name__ == "__main__":
     ]
 
     for season in seasons:
-        ingest_players_and_stats(season)
-        ingest_team_stats(season)
-        ingest_advanced_stats(season)
+        ingest_defensive_stats(season)
         time.sleep(1)
 
     print("All done.")
