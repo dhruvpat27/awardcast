@@ -85,6 +85,7 @@ python3 ingest_teams_seasons.py
 - [x] Phase 6a — Player page with career trajectory and MVP probability chart
 - [x] Phase 6b — Historical snubs page revealing MVP voter bias
 - [x] Phase 6c — Compare page with radar chart, stat cards, and head-to-head MVP predictor
+- [x] Phase 6d — DPOY leaderboard with toggle between MVP and DPOY
 - [ ] Phase 7 — Docker, deployment, polish
 
 Other Notes:

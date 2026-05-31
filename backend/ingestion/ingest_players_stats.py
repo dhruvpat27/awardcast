@@ -138,7 +138,8 @@ def ingest_defensive_stats(season_label):
 
     defensive = leaguedashplayerstats.LeagueDashPlayerStats(
         season=season_label,
-        measure_type_detailed_defense="Defense"
+        measure_type_detailed_defense="Defense",
+        per_mode_detailed="PerGame"
     ).get_data_frames()[0]
 
     year = int(season_label[:4]) + 1
@@ -159,12 +160,14 @@ def ingest_defensive_stats(season_label):
 
         db.execute(text("""
             UPDATE player_season_stats
-            SET def_rating = :def_rating
+            SET def_rating = :def_rating,
+                def_ws = :def_ws
             WHERE player_id = :player_id AND season_id = :season_id
         """), {
             "player_id": player_id,
             "season_id": season_id,
             "def_rating": float(row["DEF_RATING"]) if pd.notna(row["DEF_RATING"]) else None,
+            "def_ws": float(row["DEF_WS"]) if pd.notna(row["DEF_WS"]) else None,
         })
 
     db.commit()

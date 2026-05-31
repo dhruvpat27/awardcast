@@ -10,12 +10,13 @@ const SEASONS = [
 
 export default function Leaderboard() {
   const [season, setSeason] = useState(2025);
+  const [award, setAward] = useState('mvp');
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     setLoading(true);
-    client.get(`/leaderboard/${season}`)
+    client.get(`/leaderboard/${award}/${season}`)
       .then(res => {
         setData(res.data);
         setLoading(false);
@@ -24,36 +25,63 @@ export default function Leaderboard() {
         console.error(err);
         setLoading(false);
       });
-  }, [season]);
+  }, [season, award]);
+
+  const probKey = award === 'mvp' ? 'mvp_probability' : 'dpoy_probability';
 
   const chartData = data.slice(0, 10).map(p => ({
-    name: p.full_name.split(' ').slice(-1)[0], // last name only for chart
-    probability: parseFloat((p.mvp_probability * 100).toFixed(1)),
+    name: p.full_name.split(' ').map((n, i, arr) =>
+      i === arr.length - 1 ? n : n[0] + '.'
+    ).join(' '),
+    probability: parseFloat((p[probKey] * 100).toFixed(1)),
     full_name: p.full_name,
     player_id: p.player_id,
   }));
 
   return (
     <div style={{ maxWidth: '900px', margin: '0 auto' }}>
-      <h1 style={{ color: '#e94560' }}>MVP Leaderboard</h1>
+      <h1 style={{ color: '#e94560' }}>
+        {award.toUpperCase()} Leaderboard
+      </h1>
 
-      <select
-        value={season}
-        onChange={e => setSeason(Number(e.target.value))}
-        style={{
-          padding: '8px 16px',
-          fontSize: '16px',
-          marginBottom: '24px',
-          backgroundColor: '#1a1a2e',
-          color: 'white',
-          border: '1px solid #e94560',
-          borderRadius: '4px'
-        }}
-      >
-        {SEASONS.map(s => (
-          <option key={s} value={s}>{s - 1}-{String(s).slice(2)}</option>
+      <div style={{ display: 'flex', gap: '12px', marginBottom: '24px', alignItems: 'center' }}>
+        <select
+          value={season}
+          onChange={e => setSeason(Number(e.target.value))}
+          style={{
+            padding: '8px 16px',
+            fontSize: '16px',
+            backgroundColor: '#1a1a2e',
+            color: 'white',
+            border: '1px solid #e94560',
+            borderRadius: '4px'
+          }}
+        >
+          {SEASONS.map(s => (
+            <option key={s} value={s}>{s - 1}-{String(s).slice(2)}</option>
+          ))}
+        </select>
+
+        {['mvp', 'dpoy'].map(a => (
+          <button
+            key={a}
+            onClick={() => setAward(a)}
+            style={{
+              padding: '8px 20px',
+              backgroundColor: award === a ? '#e94560' : '#1a1a2e',
+              color: 'white',
+              border: '1px solid #e94560',
+              borderRadius: '4px',
+              cursor: 'pointer',
+              fontWeight: award === a ? 'bold' : 'normal',
+              textTransform: 'uppercase',
+              fontSize: '14px'
+            }}
+          >
+            {a}
+          </button>
         ))}
-      </select>
+      </div>
 
       {loading && <p style={{ color: 'white' }}>Loading...</p>}
 
@@ -77,7 +105,9 @@ export default function Leaderboard() {
               <tr style={{ borderBottom: '1px solid #333' }}>
                 <th style={{ color: '#aaa', textAlign: 'left', padding: '8px' }}>Rank</th>
                 <th style={{ color: '#aaa', textAlign: 'left', padding: '8px' }}>Player</th>
-                <th style={{ color: '#aaa', textAlign: 'right', padding: '8px' }}>MVP Probability</th>
+                <th style={{ color: '#aaa', textAlign: 'right', padding: '8px' }}>
+                  {award.toUpperCase()} Probability
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -93,7 +123,7 @@ export default function Leaderboard() {
                     </Link>
                   </td>
                   <td style={{ color: '#e94560', textAlign: 'right', padding: '8px', fontWeight: 'bold' }}>
-                    {(player.mvp_probability * 100).toFixed(2)}% 
+                    {(player[probKey] * 100).toFixed(2)}%
                   </td>
                 </tr>
               ))}

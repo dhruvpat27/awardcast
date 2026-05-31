@@ -27,7 +27,7 @@ export default function Compare() {
   }, [player1Data, player2Data]);
 
   useEffect(() => {
-    client.get(`/leaderboard/${season1}`).then(res => {
+    client.get(`/leaderboard/mvp/${season1}`).then(res => {
       setLeaderboard1(res.data);
       setPlayer1Id('');
       setPlayer1Data(null);
@@ -35,7 +35,7 @@ export default function Compare() {
   }, [season1]);
 
   useEffect(() => {
-    client.get(`/leaderboard/${season2}`).then(res => {
+    client.get(`/leaderboard/mvp/${season2}`).then(res => {
       setLeaderboard2(res.data);
       setPlayer2Id('');
       setPlayer2Data(null);

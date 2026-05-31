@@ -19,15 +19,10 @@ def load_training_data(db):
             f.season_id,
             s.year as season_year,
             p.full_name,
-            f.points_per_game,
-            f.usage_rate,
-            f.ts_pct,
-            f.per,
             f.team_win_pct,
             f.team_conf_rank,
-            f.games_played,
             f.games_played_pct,
-            f.ppg_rank,
+            ps.def_ws,
             ps.blocks_per_game,
             ps.steals_per_game,
             ps.rebounds_per_game,
@@ -48,17 +43,18 @@ def load_training_data(db):
 
     df["stocks_per_game"] = df["blocks_per_game"] + df["steals_per_game"]
     df["stocks_rank"] = df.groupby("season_year")["stocks_per_game"].rank(ascending=False, method="min").astype(int)
+    df["stocks_rank"] = df["stocks_rank"].clip(upper=20)
 
     return df
 
 def build_model(input_dim):
     model = keras.Sequential([
         keras.layers.Input(shape=(input_dim,)),
-        keras.layers.Dense(64, activation='relu'),
+        keras.layers.Dense(32, activation='relu', kernel_regularizer=keras.regularizers.l2(0.01)),
+        keras.layers.Dropout(0.4),
+        keras.layers.Dense(16, activation='relu', kernel_regularizer=keras.regularizers.l2(0.01)),
         keras.layers.Dropout(0.3),
-        keras.layers.Dense(32, activation='relu'),
-        keras.layers.Dropout(0.2),
-        keras.layers.Dense(16, activation='relu'),
+        keras.layers.Dense(8, activation='relu'),
         keras.layers.Dense(1, activation='sigmoid')
     ])
     model.compile(
@@ -70,25 +66,30 @@ def build_model(input_dim):
 
 def train_model(df):
     feature_cols = [
-      "blocks_per_game",
-      "steals_per_game",
-      "rebounds_per_game",
-      "def_rating",
-      "games_played_pct",
-      "team_win_pct",
-      "team_conf_rank",
-      "stocks_per_game",
-      "stocks_rank",
+        "blocks_per_game",
+        "steals_per_game",
+        "rebounds_per_game",
+        "def_rating",
+        "def_ws",
+        "games_played_pct",
+        "team_win_pct",
+        "team_conf_rank",
+        "stocks_per_game",
+        "stocks_rank",
     ]
 
-    df = df.dropna(subset=feature_cols)
+    fill_values = {col: 0 for col in feature_cols}
+    fill_values['def_rating'] = 110
+    fill_values['def_ws'] = 0
+
+    df = df.dropna(subset=[c for c in feature_cols if c not in ['def_rating', 'def_ws']])
 
     train_df = df[df["season_year"].astype(int) <= 2022]
     test_df = df[df["season_year"].astype(int) > 2022]
 
-    X_train = train_df[feature_cols].values
+    X_train = train_df[feature_cols].fillna(fill_values).values
     y_train = train_df["dpoy_top5"].values
-    X_test = test_df[feature_cols].values
+    X_test = test_df[feature_cols].fillna(fill_values).values
     y_test = test_df["dpoy_top5"].values
 
     scaler = StandardScaler()
@@ -104,8 +105,8 @@ def train_model(df):
 
     model.fit(
         X_train, y_train,
-        epochs=50,
-        batch_size=32,
+        epochs=30,
+        batch_size=64,
         validation_split=0.2,
         class_weight=class_weight,
         verbose=1
@@ -127,7 +128,6 @@ def train_model(df):
     ]
     print(top.to_string(index=False))
 
-    # Save model and scaler
     save_dir = os.path.join(os.path.dirname(__file__), 'saved_models')
     os.makedirs(save_dir, exist_ok=True)
     model.save(os.path.join(save_dir, 'dpoy_model.keras'))
