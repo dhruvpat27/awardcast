@@ -10,7 +10,7 @@ Able to display with Machine Learning, every year's suggest MVP based on previou
 ## Model Performance
 
 ### MVP Model (TensorFlow Neural Network)
-- **ROC-AUC: 0.996**
+- **ROC-AUC: 0.991**
 - Trained on 21 seasons (2004-05 through 2024-25) of player season stats, advanced metrics, and historical voting data
 - Features: points per game, usage rate, true shooting %, team win percentage, conference rank, games played, league rankings, year-over-year improvement, PIE
 - Test set: 2022-23 through 2024-25 seasons
@@ -18,7 +18,7 @@ Able to display with Machine Learning, every year's suggest MVP based on previou
 - Known limitation: model reflects statistical merit, not voter narrative — explains historically snubbed players like James Harden (2018-19, 36.1 PPG) and Luka Dončić (2023-24, 33.9 PPG)
 
 ### DPOY Model (TensorFlow Neural Network)
-- **ROC-AUC: 0.935**
+- **ROC-AUC: 0.905**
 - Same architecture as MVP model, trained on DPOY-specific features
 - Features: blocks per game, steals per game, rebounds per game, defensive rating, games played percentage, team win percentage, conference rank, stocks (blocks + steals) per game, stocks rank
 - Test set: 2022-23 through 2024-25 seasons

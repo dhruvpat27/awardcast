@@ -30,9 +30,8 @@ def ingest_teams():
 def ingest_seasons():
     db = SessionLocal()
 
-    # We'll pull data from 2004-05 through 2023-24
     seasons = []
-    for year in range(2005, 2026):
+    for year in range(2005, 2027):
         label = f"{year-1}-{str(year)[2:]}"
         seasons.append({"year": year, "label": label})
 
