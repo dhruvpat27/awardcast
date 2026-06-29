@@ -81,7 +81,90 @@ def get_snubs(min_probability: float = 0.85):
         "team_win_pct"
     ]].to_dict(orient="records")
 
+@router.get("/dpoy-snubs/{min_probability}")
+def get_dpoy_snubs(min_probability: float = 0.85):
+    db = SessionLocal()
 
+    import joblib
+    import tensorflow as tf
+    import numpy as np
+    import pandas as pd
+
+    BASE = os.path.join(os.path.dirname(__file__), '..', '..', 'models', 'saved_models')
+    model = tf.keras.models.load_model(os.path.join(BASE, 'dpoy_model.keras'))
+    scaler = joblib.load(os.path.join(BASE, 'dpoy_scaler.pkl'))
+
+    FEATURE_COLS = [
+        "blocks_per_game", "steals_per_game", "rebounds_per_game",
+        "def_rating", "def_ws", "games_played_pct", "team_win_pct",
+        "team_conf_rank", "stocks_per_game", "stocks_rank",
+    ]
+
+    result = db.execute(text("""
+        SELECT
+            p.id as player_id,
+            p.full_name,
+            s.label as season,
+            s.year as season_year,
+            f.games_played_pct,
+            f.team_win_pct,
+            f.team_conf_rank,
+            ps.blocks_per_game,
+            ps.steals_per_game,
+            ps.rebounds_per_game,
+            ps.def_rating,
+            ps.def_ws,
+            v.final_rank as dpoy_rank,
+            v.won as dpoy_winner,
+            aw.player_id as actual_winner_id,
+            vw.full_name as actual_winner
+        FROM player_season_features f
+        JOIN players p ON p.id = f.player_id
+        JOIN seasons s ON s.id = f.season_id
+        JOIN player_season_stats ps ON ps.player_id = f.player_id
+            AND ps.season_id = f.season_id
+        LEFT JOIN award_votes v ON v.player_id = f.player_id
+            AND v.season_id = f.season_id
+            AND v.award_type = 'DPOY'
+        LEFT JOIN award_votes aw ON aw.season_id = f.season_id
+            AND aw.award_type = 'DPOY'
+            AND aw.won = TRUE
+        LEFT JOIN players vw ON vw.id = aw.player_id
+        WHERE f.award_eligible = TRUE
+        AND (v.won = FALSE OR v.won IS NULL)
+        ORDER BY s.year
+    """))
+
+    rows = [dict(row._mapping) for row in result]
+    db.close()
+
+    if not rows:
+        return []
+
+    df = pd.DataFrame(rows)
+    df["stocks_per_game"] = df["blocks_per_game"] + df["steals_per_game"]
+    df["stocks_rank"] = df.groupby("season_year")["stocks_per_game"].rank(ascending=False, method="min").astype(int)
+    df["stocks_rank"] = df["stocks_rank"].clip(upper=20)
+
+    fill_values = {col: 0 for col in FEATURE_COLS}
+    fill_values['def_rating'] = 110
+    fill_values['def_ws'] = 0
+
+    X = df[FEATURE_COLS].fillna(fill_values).values
+    X_scaled = scaler.transform(X)
+    probs = model.predict(X_scaled).flatten()
+
+    df["dpoy_probability"] = probs
+    df = df.replace({float('nan'): None})
+
+    snubs = df[df["dpoy_probability"] >= min_probability].copy()
+    snubs = snubs.sort_values("dpoy_probability", ascending=False)
+
+    return snubs[[
+        "player_id", "full_name", "season", "dpoy_probability",
+        "dpoy_rank", "actual_winner_id", "actual_winner",
+        "blocks_per_game", "steals_per_game", "def_rating"
+    ]].to_dict(orient="records")
 
 @router.get("/player/{player_id}")
 def get_player_predictions(player_id: int):
@@ -197,7 +280,7 @@ def head_to_head(player1_id: int, season1: int, player2_id: int, season2: int):
     import numpy as np
     raw = np.array([p1_prob, p2_prob])
     # Amplify the gap by raising to a power before normalizing
-    amplified = raw ** 10
+    amplified = raw ** 50
     total = amplified[0] + amplified[1]
 
     p1_pct = float(round((amplified[0] / total) * 100, 1))

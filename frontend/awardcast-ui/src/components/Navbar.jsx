@@ -16,6 +16,7 @@ export default function Navbar() {
       <Link to="/" style={{ color: 'white', textDecoration: 'none' }}>Leaderboard</Link>
       <Link to="/compare" style={{ color: 'white', textDecoration: 'none' }}>Compare</Link>
       <Link to="/snubs" style={{ color: 'white', textDecoration: 'none' }}>Snubs</Link>
+      <Link to="/dpoy-snubs" style={{ color: 'white', textDecoration: 'none' }}>DPOY Snubs</Link>
     </nav>
   );
 }

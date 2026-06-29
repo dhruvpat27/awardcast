@@ -5,6 +5,8 @@ import Leaderboard from './pages/Leaderboard';
 import PlayerPage from './pages/PlayerPage';
 import Compare from './pages/Compare';
 import Snubs from './pages/Snubs';
+import DpoySnubs from './pages/DpoySnubs';
+
 
 
 
@@ -18,6 +20,7 @@ function App() {
           <Route path="/player/:id" element={<PlayerPage />} />
           <Route path="/compare" element={<Compare />} />
           <Route path="/snubs" element={<Snubs />} />
+          <Route path="/dpoy-snubs" element={<DpoySnubs />} />
         </Routes>
       </div>
     </Router>
