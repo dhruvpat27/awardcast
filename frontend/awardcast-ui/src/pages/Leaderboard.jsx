@@ -4,12 +4,12 @@ import { Link } from 'react-router-dom';
 import client from '../api/client';
 
 const SEASONS = [
-  2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016,
+  2026, 2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016,
   2015, 2014, 2013, 2012, 2011, 2010, 2009, 2008, 2007, 2006, 2005
 ];
 
 export default function Leaderboard() {
-  const [season, setSeason] = useState(2025);
+  const [season, setSeason] = useState(2026);
   const [award, setAward] = useState('mvp');
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
