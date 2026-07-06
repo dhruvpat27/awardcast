@@ -1,97 +1,177 @@
-## AwardCast
-**Functionality**
-AwardCast is an NBA analytics and machine learning platform built to analyze MVP voting trends, predict award outcomes, and investigate whether certain players were statistically “snubbed” of MVP awards. The project uses historical NBA player statistics, advanced metrics, team performance, and award voting data to allow users to see what machine learning models determine the “statistical MVP” should have been. 
+# AwardCast
 
-Want to eventually extend it to an app that can forecast future MVP's or allow you to input a player's stats into a year they did not play in and see if they would win MVP or not.
+AwardCast is an NBA analytics and machine learning experience for exploring MVP and DPOY voting trends, surfacing historical snubs, and comparing players across seasons using model-based probability estimates.
 
-## Current Functionality
-Able to display with Machine Learning, every year's suggest MVP based on previous trends, and provides a bar graph of the top leaders. This works for 2004 - 2025. Also allows you to compare players that were in the running from MVP between years, for instance, allowing you to compare SGA's 2025 MVP year to Jokic in 2024. Also displays all potential MVP snubs throughout the 20 years with ranging model confidence rates. 
+It combines a FastAPI backend, a React frontend, and TensorFlow-based award prediction models to make the data feel interactive and easy to explore.
 
-## Model Performance
+## Live links
 
-### MVP Model (TensorFlow Neural Network)
-- **ROC-AUC: 0.991**
-- Trained on 21 seasons (2004-05 through 2024-25) of player season stats, advanced metrics, and historical voting data
-- Features: points per game, usage rate, true shooting %, team win percentage, conference rank, games played, league rankings, year-over-year improvement, PIE
-- Test set: 2022-23 through 2024-25 seasons
-- Top 10 predicted candidates across test seasons were all confirmed top-5 MVP vote receivers
-- Known limitation: model reflects statistical merit, not voter narrative — explains historically snubbed players like James Harden (2018-19, 36.1 PPG) and Luka Dončić (2023-24, 33.9 PPG)
+- Frontend: https://awardcast-xbq4-2305ptreg-dhruvprojs.vercel.app/
+- Backend API: https://awardcast-production.up.railway.app/
+- API docs: https://awardcast-production.up.railway.app/docs
 
-### DPOY Model (TensorFlow Neural Network)
-- **ROC-AUC: 0.905**
-- Same architecture as MVP model, trained on DPOY-specific features
-- Features: blocks per game, steals per game, rebounds per game, defensive rating, games played percentage, team win percentage, conference rank, stocks (blocks + steals) per game, stocks rank
-- Test set: 2022-23 through 2024-25 seasons
-- Lower accuracy than MVP reflects the fundamental difficulty of quantifying defensive impact through box score stats alone — metrics like steals and blocks don't capture defensive IQ, positioning, or deterrence effect
-- Known limitation: model overrates guards with high steal rates (e.g. SGA) since traditional stats can't distinguish defensive specialists from offensive stars with good steal numbers
+## What the app does
 
-## Phase Notes
-### VENV + Database Set Up
-#### Database Schema
+AwardCast lets users:
 
-Six tables make up the foundation of the data warehouse:
+- Browse MVP and DPOY leaderboards by season
+- Open individual player pages with season-by-season MVP probability trends
+- Compare two players head-to-head with a prediction view
+- Explore historical MVP and DPOY snubs based on model confidence
+- See how the model ranks players versus actual award outcomes
 
-- **seasons** — each NBA season, stored by year and label (e.g. 2023-24)
-- **teams** — all NBA teams with their NBA.com ID and abbreviation
-- **players** — all players with their NBA.com ID, name, position, active status
-- **team_season_stats** — wins, losses, win percentage, conference rank per season
-- **player_season_stats** — full per-game and advanced stats for each player per season
-- **award_votes** — historical MVP/MIP/DPOY voting results used as ML training labels
+## Key features
 
----
+- Interactive award leaderboards for MVP and DPOY, with season-based filtering so users can compare how the model ranks players across different years.
+- Player detail pages that combine historical career stats with season-by-season MVP probability estimates, making it easier to understand how a player's profile evolved over time.
+- A head-to-head comparison experience that lets users compare two players from different seasons and see how the model would likely assess them against each other.
+- Historical snub analysis that surfaces players who had strong model confidence but were not selected as actual award winners, helping highlight potential voter bias or overlooked performances.
+- A machine learning-driven prediction workflow that uses player stats, team performance, and historical voting data to estimate the likelihood that a player would win an award.
+- A polished, data-first user experience built around NBA award conversations, with clear visualizations and easy navigation between leaderboard, player, and comparison views.
 
-#### Why a Virtual Environment
+## Tech stack
 
-A venv isolates this project's Python dependencies from everything else on your machine.
-Without it, installing packages globally can cause version conflicts across projects.
-The `requirements.txt` file captures the exact versions used so anyone cloning this repo
-can recreate the environment exactly with `pip install -r requirements.txt`.
+- Frontend: React, React Router, Recharts, Axios
+- Backend: FastAPI, SQLAlchemy, PostgreSQL
+- ML: TensorFlow, scikit-learn, pandas, numpy, joblib
+- Deployment: Vercel (frontend), Railway (backend)
 
-#### Data Ingestion
+## Project structure
 
-Data is pulled using `nba_api`, a free Python package that hits NBA.com endpoints directly.
-No API key required. Scripts live in `backend/ingestion/`.
+- backend/api: FastAPI routes and app entrypoint
+- backend/db: database connection and session setup
+- backend/ingestion: data ingestion scripts
+- backend/models: model training code and saved model artifacts
+- frontend/awardcast-ui: React app
 
-#### What's been ingested so far
-- **30 NBA teams** — pulled from nba_api static data, stored with NBA.com team IDs
-- **20 seasons** — 2004-05 through 2024-25, stored with year and label
-- **2225 players** - the stats of all 2225 players who played during this time period
+## Model performance
 
-#### Development Phase Notes
-- First model was slightly inaccurate, picked Luka for 2024, because it overweighs scoring rate (ppg). More advanced stats like BPM and other factors will be added next
-- Added advanced stats to PostgreSQL table, now can pull info. like utility rate, true shooting pct, and much more. These now affect the mvp predictions, Jokic is properly represented for 2024 and 2025.
-- Created first Tensorflow model for MVP. Only one inaccuracy so far, Luka is back as 2024 MVP favorite, barely over Jokic. This might be statistically accurate (a lot of people that year say Luka was robbed of the award)
-- Made FastAPI backend which stores and provides easy access to the Tensorflow model's output.
+### MVP model
+- ROC-AUC: about 0.991
+- Trained on historical player-season features and award voting data
+- Uses features such as points per game, usage rate, true shooting percentage, player impact estimate, team win percentage, conference rank, games played, and year-over-year improvement
 
+### DPOY model
+- ROC-AUC: about 0.905
+- Trained on defensive metrics including blocks, steals, rebounds, defensive rating, stocks, team strength, and games played
 
-#### To re-run ingestion
+## Local development
+
+### Prerequisites
+- Python 3.10+ or 3.12
+- Node.js 18+
+- PostgreSQL database
+
+### 1. Clone the repo
+
+```bash
+git clone https://github.com/dhruvpat27/awardcast.git
+cd awardcast
+```
+
+### 2. Create and activate a Python virtual environment
+
+```bash
+python3 -m venv venv
+source venv/bin/activate
+```
+
+### 3. Install Python dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+### 4. Set environment variables
+
+Create a `.env` file in the repo root with either:
+
+```env
+DATABASE_URL=postgresql://USER:PASSWORD@HOST:PORT/DBNAME
+```
+
+or the individual DB variables:
+
+```env
+DB_HOST=...
+DB_PORT=5432
+DB_NAME=...
+DB_USER=...
+DB_PASSWORD=...
+```
+
+### 5. Run the backend
+
+```bash
+python3 -m uvicorn backend.api.main:app --host 0.0.0.0 --port 8000
+```
+
+The API will be available at:
+- http://127.0.0.1:8000
+- http://127.0.0.1:8000/docs
+
+### 6. Run the frontend
+
+```bash
+cd frontend/awardcast-ui
+npm install
+npm start
+```
+
+The frontend will be available at:
+- http://localhost:3000
+
+## Database schema
+
+The app uses a PostgreSQL schema centered around these tables:
+
+- seasons
+- teams
+- players
+- team_season_stats
+- player_season_stats
+- award_votes
+
+## Data ingestion
+
+The ingestion scripts live in `backend/ingestion/` and can be run to rebuild the database from NBA data sources.
+
+Example:
+
 ```bash
 cd backend/ingestion
 python3 ingest_teams_seasons.py
+```
 
+## Deployment setup
 
-## Development Phases
+### Backend on Railway
 
-- [x] Phase 1a — Project setup (venv, dependencies, PostgreSQL)
-- [x] Phase 1b — Database schema (6 tables)
-- [x] Phase 1c — DB connection via SQLAlchemy
-- [x] Phase 1d — Teams and seasons ingested
-- [x] Phase 1e — Player and team season stats ingestion
-- [x] Phase 2 — Feature engineering
-- [x] Phase 3a — Historical MVP voting data scraped from Basketball Reference (21 seasons)
-- [x] Phase 3b - Baseline ML models
-- [x] Phase 4 — TensorFlow neural network MVP model (ROC-AUC: 0.996)
-- [x] Phase 5 — FastAPI backend (players, leaderboard, predictions endpoints)
-- [x] Phase 6a — Player page with career trajectory and MVP probability chart
-- [x] Phase 6b — Historical snubs page revealing MVP voter bias
-- [x] Phase 6c — Compare page with radar chart, stat cards, and head-to-head MVP predictor
-- [x] Phase 6d — DPOY leaderboard with toggle between MVP and DPOY
-- [ ] Phase 7 — Docker, deployment, polish
+- Build uses the Dockerfile in `backend/Dockerfile`
+- Start command:
 
-Other Notes:
+```bash
+python3 -m uvicorn backend.api.main:app --host 0.0.0.0 --port 8000
+```
 
-Activating the Venv:
-source venv/bin/activate
+Required environment variables:
+- `DATABASE_URL` or the DB variable set
 
-Starting PostgreSQL (in case it doesn't run auto):
-brew services start postgresql@15
+### Frontend on Vercel
+
+- Import the repo into Vercel
+- Set the root directory to `frontend/awardcast-ui`
+- Build command: `npm run build`
+- Output directory: `build`
+- Add the backend URL as the API target if you want to make it configurable
+
+## Roadmap ideas
+
+- Add future-season prediction workflows
+- Let users input a hypothetical player season and see predicted award chances
+- Add richer player comparison visuals
+- Improve model explainability and confidence intervals
+
+## Notes
+
+AwardCast is a personal analytics project built to explore how data and machine learning can illuminate historical NBA award voting behavior. It is designed to be useful, interactive, and easy to extend.
