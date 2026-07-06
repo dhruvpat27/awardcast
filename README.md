@@ -12,13 +12,15 @@ It combines a FastAPI backend, a React frontend, and TensorFlow-based award pred
 
 ## What the app does
 
-AwardCast lets users:
+AwardCast is designed for users who want to move beyond surface-level box score browsing and explore how advanced analytics and machine learning interpret NBA award races. The experience combines historical player data, contextual team performance, and award-voting outcomes to surface the players the model believes were most deserving of MVP or DPOY recognition.
 
-- Browse MVP and DPOY leaderboards by season
-- Open individual player pages with season-by-season MVP probability trends
-- Compare two players head-to-head with a prediction view
-- Explore historical MVP and DPOY snubs based on model confidence
-- See how the model ranks players versus actual award outcomes
+Users can:
+
+- Explore MVP and DPOY leaderboards across multiple seasons with model-driven probability estimates rather than relying on conventional narratives alone.
+- Dive into individual player profiles to inspect career trajectories, seasonal performance trends, and how the model evaluated each season over time.
+- Compare two players side by side in a head-to-head analysis that highlights how the prediction engine would frame their relative award chances.
+- Investigate historical snubs and identify cases where the model strongly favored a player who was not ultimately recognized by voters.
+- Gain a more analytical perspective on award history by pairing statistical evidence with outcome-based context.
 
 ## Key features
 
