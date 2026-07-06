@@ -1,0 +1,6 @@
+venv
+.env
+.git
+__pycache__
+*.pyc
+frontend/awardcast-ui/node_modules

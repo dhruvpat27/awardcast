@@ -4,7 +4,7 @@ import numpy as np
 import joblib
 import tensorflow as tf
 from fastapi import APIRouter
-from connection import SessionLocal
+from backend.db.connection import SessionLocal
 from sqlalchemy import text
 
 router = APIRouter()

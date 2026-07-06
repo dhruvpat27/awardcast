@@ -1,8 +1,7 @@
-import sys
 import os
 
 from fastapi import APIRouter
-from connection import SessionLocal
+from backend.db.connection import SessionLocal
 from sqlalchemy import text
 
 router = APIRouter()

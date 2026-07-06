@@ -1,13 +1,6 @@
-import sys
-import os
-
-# Add db and models to path
-sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'db'))
-sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'models'))
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from routes import players, leaderboard, predictions
+from backend.api.routes import players, leaderboard, predictions
 
 app = FastAPI(title="AwardCast API")
 
