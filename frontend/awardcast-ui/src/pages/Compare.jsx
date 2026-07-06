@@ -24,7 +24,7 @@ export default function Compare() {
       client.get(`/predictions/head-to-head/${player1Id}/${season1}/${player2Id}/${season2}`)
         .then(res => setH2h(res.data));
     }
-  }, [player1Data, player2Data]);
+  }, [player1Id, player2Id, season1, season2, player1Data, player2Data]);
 
   useEffect(() => {
     client.get(`/leaderboard/mvp/${season1}`).then(res => {
